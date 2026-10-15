@@ -1,14 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-训练与评估模块：封装单次实验的训练和测试流程，返回准确率等指标。
-"""
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
 
 def build_dataloaders(X_train, y_train, X_valid, y_valid, batch_size=64):
-    """构建训练/验证 DataLoader。"""
     X_train_t = torch.tensor(X_train, dtype=torch.float32) / 255.0
     y_train_t = torch.tensor(y_train, dtype=torch.long)
     X_valid_t = torch.tensor(X_valid, dtype=torch.float32) / 255.0
@@ -24,12 +19,10 @@ def build_dataloaders(X_train, y_train, X_valid, y_valid, batch_size=64):
 
 def train_and_evaluate(model, train_loader, valid_loader,
                        optimizer, criterion, num_epochs=5, verbose=True):
-    """训练并返回 (最终验证准确率, 每轮验证准确率列表, 每轮训练损失列表)。"""
     device = next(model.parameters()).device
     val_accs = []
     train_losses = []
     for epoch in range(num_epochs):
-        # ---- 训练阶段 ----
         model.train()
         running_loss = 0.0
         total_batches = len(train_loader)
@@ -44,7 +37,6 @@ def train_and_evaluate(model, train_loader, valid_loader,
         avg_loss = running_loss / total_batches
         train_losses.append(avg_loss)
 
-        # ---- 验证阶段 ----
         model.eval()
         correct = 0
         total = 0

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-"""从 results.json 生成调参记录 Markdown 文档。"""
 import json
 
 with open('results.json', encoding='utf-8') as f:
@@ -10,7 +8,6 @@ def fmt_hidden(h):
     return '(' + ','.join(str(x) for x in h) + ')'
 
 
-# 分组阶段
 stages = [
     ('baseline', '基线'),
     ('epoch', '阶段1：epoch 训练轮数'),
@@ -39,7 +36,6 @@ for key, title in stages:
                f"wd={r['weight_decay']}")
         lines.append(f"| {cfg} | {r['val_acc']:.2f}% |")
 
-# 每阶段的小结
 lines.append('\n---\n')
 lines.append('\n## 阶段小结与选参\n')
 
@@ -56,7 +52,6 @@ for key, title in stages:
     if key in conclusions:
         lines.append(f'- **{title}**：{conclusions[key]}')
 
-# 最优配置
 lines.append('\n---\n')
 lines.append('\n## 综合结论\n')
 lines.append('1. **最优验证准确率**：Adam 优化器 lr=0.001 达到 **98.01%**（阶段3），为该数据集下的较优结果。')

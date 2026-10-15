@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-"""用真实实验结果填充 MLP调参实验记录表.xlsx"""
 import json
 import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill
@@ -11,7 +9,6 @@ with open('D:/Code/python/MLP_拓展任务/results.json', encoding='utf-8') as f
 
 wb = openpyxl.load_workbook(XLSX)
 
-# ============ Sheet1: 基准配置 ============
 ws = wb['基准配置']
 base = {
     '数据集': 'MNIST 手写数字（train-images 60000 张，28×28 灰度）',
@@ -41,13 +38,9 @@ for row in ws.iter_rows(min_row=2, max_row=21):
         row[1].value = base[key]
         row[1].alignment = Alignment(wrap_text=True, vertical='center')
 
-# ============ Sheet2: 调参实验记录 ============
 ws2 = wb['调参实验记录']
-# 表头在行2，数据从行3开始
 headers = [c.value for c in ws2[2]]
-# 实验记录顺序（按调参顺序）
 records = [
-    # (实验编号, 修改参数名, 修改前→修改后, results中的key, 备注)
     (1, '基线', '-', 'baseline', '基准配置，作为后续对比起点'),
     (2, 'Epoch', '10 → 5', 'epoch-5', '训练轮数减少，准确率下降'),
     (3, 'Epoch', '5 → 10', 'epoch-10', ''),
@@ -74,7 +67,6 @@ records = [
     (24, '隐藏层神经元数', '(256,128) → (128,64)', 'neurons-128-64', '神经元数影响不大'),
 ]
 
-# 建立 step -> result 索引
 by_step = {r['step']: r for r in results}
 
 def fmt_hidden(h):
@@ -87,7 +79,6 @@ for (num, param_name, change, step, note) in records:
     hidden_str = fmt_hidden(r['hidden_sizes'])
     train_loss = r['train_loss_curve'][-1]
     val_acc = r['val_acc']
-    # 判断是否过拟合：比较训练末段loss很低而验证acc, 简单启发式
     overfit = ''
     if train_loss < 0.05 and val_acc < 95:
         overfit = '疑似'
@@ -100,12 +91,12 @@ for (num, param_name, change, step, note) in records:
         r['lr'],
         r['dropout'],
         r['weight_decay'],
-        64,  # Batch Size
+        64,
         'ReLU',
         round(train_loss, 4),
-        '',  # 验证Loss（未单独记录）
+        '',
         round(val_acc, 2),
-        '',  # 训练时间(s)（未记录）
+        '',
         overfit,
         note,
     ]
@@ -113,7 +104,6 @@ for (num, param_name, change, step, note) in records:
         ws2.cell(row=row_idx, column=col, value=v)
     row_idx += 1
 
-# 最优配置行（第34行，先取消整行合并）
 best_row = 34
 if 'A34:R34' in [str(r) for r in ws2.merged_cells.ranges]:
     ws2.unmerge_cells('A34:R34')
@@ -127,20 +117,17 @@ best_cfg = [
 for col, v in enumerate(best_cfg, start=1):
     ws2.cell(row=best_row, column=col, value=v)
 
-# ============ Sheet3: 训练曲线数据 ============
 ws3 = wb['训练曲线数据']
-# 只记录最优实验 opt-Adam 的逐 epoch 曲线（最有代表性）
 best = by_step['opt-Adam']
 row3 = 3
 for ep, (loss, acc) in enumerate(zip(best['train_loss_curve'], best['val_acc_curve']), start=1):
     ws3.cell(row=row3, column=1, value='实验11(Adam)')
     ws3.cell(row=row3, column=2, value=ep)
     ws3.cell(row=row3, column=3, value=round(loss, 4))
-    ws3.cell(row=row3, column=4, value='')  # 验证Loss未记录
+    ws3.cell(row=row3, column=4, value='')
     ws3.cell(row=row3, column=5, value=round(acc, 2))
     row3 += 1
 
-# ============ Sheet5: 实验结论 ============
 ws5 = wb['实验结论']
 conclusions = {
     '拓展任务做了什么': '基于 PyTorch 建立多隐藏层 MLP 做 MNIST 手写数字识别：(1)构建≥2隐藏层网络；(2)按类别随机打乱5等分，前4份训练/第5份验证；(3)对比1/2/3个隐藏层准确率；(4)对比2隐藏层不同神经元个数。',

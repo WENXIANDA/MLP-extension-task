@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-拓展任务主实验：
-  (1) 建立至少 2 个隐藏层的全连接神经网络；
-  (3) 比较 1 / 2 / 3 个隐藏层的预测准确率；
-  (4) 比较 2 个隐藏层下不同神经元个数的准确率。
-"""
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -14,7 +7,6 @@ from trainer import build_dataloaders, train_and_evaluate
 
 torch.manual_seed(42)
 
-# ---------- 数据准备 ----------
 X_train, y_train, X_valid, y_valid = load_data('.')
 train_loader, valid_loader = build_dataloaders(
     X_train, y_train, X_valid, y_valid, batch_size=64)
@@ -24,7 +16,6 @@ CRITERION = nn.CrossEntropyLoss()
 
 def run_exp(hidden_sizes, dropout=0.0, lr=0.01, num_epochs=10,
             optimizer_name='SGD', weight_decay=0.0):
-    """运行一次实验，返回最终验证准确率。"""
     model = MLP(hidden_sizes=hidden_sizes, dropout=dropout)
     if optimizer_name == 'SGD':
         optimizer = optim.SGD(model.parameters(), lr=lr, weight_decay=weight_decay)

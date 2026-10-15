@@ -1,14 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-最终模型训练脚本：使用调参得到的最优配置，训练并保存模型，同时展示错误预测样本。
-
-最优配置（由调参实验得出）：
-  隐藏层: (256, 128)，2 个隐藏层
-  优化器: Adam, lr=0.001
-  epoch: 20
-  Dropout: 0（不使用）
-  权重衰减: 0
-"""
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -37,11 +26,9 @@ acc, val_accs, train_losses = train_and_evaluate(
     num_epochs=20, verbose=True)
 print(f'\n最终验证准确率: {acc:.2f}%')
 
-# 保存模型
 torch.save(model.state_dict(), 'best_model.pth')
 print('模型已保存为 best_model.pth')
 
-# 绘制训练曲线
 plt.figure(figsize=(12, 4))
 plt.subplot(1, 2, 1)
 plt.plot(range(1, 21), train_losses, marker='o', label='Train Loss')
@@ -60,7 +47,6 @@ plt.savefig('training_curves.png', dpi=100)
 print('训练曲线已保存为 training_curves.png')
 
 
-# 展示错误预测样本
 def get_wrong_predictions(model, valid_loader):
     wrong_images, wrong_labels, wrong_preds = [], [], []
     model.eval()
